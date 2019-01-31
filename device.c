@@ -59,12 +59,15 @@ static struct Resident const myDeviceResident __attribute__((used)) = {
     can be sizeof(struct Library), sizeof(struct Device) or any size necessary to
     store user defined object extending the Device structure.
 */
+
+APTR initFunction(struct MyDevice * base asm("d0"), ULONG segList asm("a0"));
+
 static const APTR funcTable[];
 static const APTR initTable[4] = {
     (APTR)sizeof(struct MyDevice),
     (APTR)funcTable,
     NULL,
-    NULL
+    (APTR)initFunction
 };
 
 void openLib(struct IORequest * io asm("a1"), LONG unitNumber asm("d0"),
@@ -72,16 +75,29 @@ void openLib(struct IORequest * io asm("a1"), LONG unitNumber asm("d0"),
 ULONG closeLib(struct IORequest * io asm("a1"), struct MyDevice * base asm("a6"));
 ULONG expungeLib(struct MyDevice * base asm("a6"));
 APTR extFunc(struct MyDevice * base asm("a6"));
+void myBeginIO(struct IORequest * io asm("a1"), struct MyDevice * base asm("a6"));
+LONG myAbortIO(struct IORequest *io asm("a1"), struct MyDevice *base asm("a6"));
 
 static const APTR funcTable[] = {
     (APTR)openLib,
     (APTR)closeLib,
     (APTR)expungeLib,
     (APTR)extFunc,
-//    (APTR)myBeginIO,
-//    (APTR)myAbortIO,
+    (APTR)myBeginIO,
+    (APTR)myAbortIO,
     (APTR)-1
 };
+
+APTR initFunction(struct MyDevice *base asm("d0"), ULONG segList asm("a0"))
+{
+    struct ExecBase *SysBase = *(struct ExecBase **)4UL;
+    base->md_SysBase = SysBase;
+    base->md_SegList = segList;
+    base->md_DosBase = (struct DosLibrary *)OpenLibrary((CONST_STRPTR)"dos.library", 0);
+    base->md_Device.dd_Library.lib_Revision = MY_DEVICE_REVISION;
+
+    return base;
+}
 
 void openLib(struct IORequest * io asm("a1"), LONG unitNumber asm("d0"),
     ULONG flags asm("d1"), struct MyDevice * base asm("a6"))

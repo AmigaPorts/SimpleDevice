@@ -1,10 +1,10 @@
 CC := /opt/amiga/bin/m68k-amigaos-gcc
 CXX := /opt/amiga/bin/m68k-amigaos-g++
-CFLAGS  := -Os -Wall -Wextra -Werror
-CXXFLAGS:= -std=c++0x -Os -Wall -Wextra -Werror
+CFLAGS  := -Os -Wall 
+CXXFLAGS:= -std=c++0x -Os -Wall
 LDFLAGS := -s -nostdlib -nostartfiles
 
-OBJS := device.o device_end.o
+OBJS := device.o device_beginio.o device_abortio.o device_end.o
 OBJDIR := Build
 OBJNAME := my.device
 
