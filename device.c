@@ -59,9 +59,10 @@ static struct Resident const myDeviceResident __attribute__((used)) = {
     can be sizeof(struct Library), sizeof(struct Device) or any size necessary to
     store user defined object extending the Device structure.
 */
+static const APTR funcTable[];
 static const APTR initTable[4] = {
     (APTR)sizeof(struct MyDevice),
-    NULL,
+    (APTR)funcTable,
     NULL,
     NULL
 };
@@ -85,7 +86,8 @@ static const APTR funcTable[] = {
 void openLib(struct IORequest * io asm("a1"), LONG unitNumber asm("d0"),
     ULONG flags asm("d1"), struct MyDevice * base asm("a6"))
 {
-    int ok = 1;
+    (void)flags;
+    (void)unitNumber;
 
     /* 
         Do whatever necessary to open given unit number with flags, set NT_REPLYMSG if 
@@ -110,6 +112,8 @@ void openLib(struct IORequest * io asm("a1"), LONG unitNumber asm("d0"),
 
 ULONG closeLib(struct IORequest * io asm("a1"), struct MyDevice * base asm("a6"))
 {
+    (void)io;
+
     base->md_Device.dd_Library.lib_OpenCnt--;
 
     if (base->md_Device.dd_Library.lib_OpenCnt == 0)
@@ -134,6 +138,7 @@ ULONG expungeLib(struct MyDevice * base asm("a6"))
     {
         struct ExecBase *SysBase = base->md_SysBase;
         ULONG size;
+        ULONG segList = base->md_SegList;
 
         /* Remove yourself from list of devices */
         Remove((struct Node *)base);
@@ -149,9 +154,10 @@ ULONG expungeLib(struct MyDevice * base asm("a6"))
         APTR pointer = (APTR)((ULONG)base - base->md_Device.dd_Library.lib_NegSize);
 
         FreeMem(pointer, size);
+
+        return segList;
     }
 }
-
 
 APTR extFunc(struct MyDevice * base asm("a6"))
 {
