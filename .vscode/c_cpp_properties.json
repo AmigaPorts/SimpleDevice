@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Amiga",
+            "includePath": [
+                "/opt/amiga/m68k-amigaos/ndk-include"
+            ],
+            "defines": [
+            ],
+            "macFrameworkPath": [],
+            "compilerPath": "/opt/amiga/bin/m68k-amigaos-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
